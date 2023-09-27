@@ -1,0 +1,82 @@
+﻿@using IssueReproduction.Components.ViewModels
+@using Microsoft.Fast.Components.FluentUI
+@namespace Sample
+
+<label for="sample" class="form-label">Sample <span class="text-danger">*</span></label>
+<FluentAutocomplete
+    Id="sample"
+    TOption="SampleViewModel"
+    OnOptionsSearch="@OnShipperSearchAsync"
+    MaximumSelectedOptions="1"
+    OptionText="@(item => item.Name)"
+    @bind-SelectedOption="@SelectedOption"
+    Width="450"
+    Height="100">
+
+    <SelectedOptionTemplate>
+        <p>@context.Name - @context.Address</p>
+    </SelectedOptionTemplate>
+
+    <OptionTemplate>
+        <b>@context.Name.ToUpper()</b>
+        <address>
+            @context.Address
+            <br/>
+            @context.City @context.State, @context.PostalCode
+        </address>
+    </OptionTemplate>
+</FluentAutocomplete>
+
+@code {
+    private SampleViewModel? SelectedOption { get; set; }
+
+    private IList<SampleViewModel> Options { get; set; } = new List<SampleViewModel>()
+    {
+        new SampleViewModel()
+        {
+            Name = "My Vendor",
+            Address = "123 Main Street",
+            City = "Chicago",
+            State = "IL",
+            PostalCode = "60601"
+        },
+        new SampleViewModel()
+        {
+            Name = "Another Vendor",
+            Address = "1 Michigan Ave",
+            City = "Chicago",
+            State = "IL",
+            PostalCode = "60601"
+        },
+        new SampleViewModel()
+        {
+            Name = "Local Vendor",
+            Address = "456 First Street",
+            City = "Chicago",
+            State = "IL",
+            PostalCode = "60601"
+        },
+        new SampleViewModel()
+        {
+            Name = "Distant Vendor",
+            Address = "123 Main Street",
+            City = "Los Angeles",
+            State = "CA",
+            PostalCode = "90001"
+        },
+    };
+
+
+    private async Task OnShipperSearchAsync(OptionsSearchEventArgs<SampleViewModel> e)
+    {
+        await Task.Delay(5);
+
+        e.Items = Options.Where(s => s.Name.Contains(e.Text, StringComparison.OrdinalIgnoreCase) ||
+                                     s.Address.Contains(e.Text, StringComparison.OrdinalIgnoreCase) ||
+                                     s.City.Contains(e.Text, StringComparison.OrdinalIgnoreCase) ||
+                                     s.State.Contains(e.Text, StringComparison.OrdinalIgnoreCase) ||
+                                     s.PostalCode.Contains(e.Text, StringComparison.CurrentCultureIgnoreCase))
+            .OrderBy(s => s.Name);
+    }
+
+}
